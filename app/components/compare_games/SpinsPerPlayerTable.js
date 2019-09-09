@@ -31,7 +31,7 @@ class SpinsPerPlayerTableHead extends React.Component {
 
     getColumns = (games) => {
         let columns = [];
-        columns.push({ id: 'interval', numeric: false, disablePadding: false, label: 'Интервал' });
+        columns.push({ id: 'interval', numeric: false, disablePadding: false, label: 'Дата/Период' });
         for (let i = 0; i < games.length; i++) {
             columns.push({id: `${games[i]}_${i}`, numeric: false, disablePadding: false, label: games[i]});
         }

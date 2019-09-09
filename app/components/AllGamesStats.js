@@ -10,7 +10,7 @@ class AllGamesStats extends React.Component {
 	state = {
 		data: null,
 		request: {
-			"user_name":"user.name",
+			"user_name":"e.mostovoy",
 			"mode":1,
 		},
 	}
@@ -28,7 +28,9 @@ class AllGamesStats extends React.Component {
 	  	    timeout: 10000,
 	  	})
 	  	.done(data => {
-	  		this.setState(() => ({data: JSON.parse(data)}))
+	  		this.setState(() => ({data: JSON.parse(data)}), () => {
+	  			console.log(this.state.data);
+	  		})
 	  	})
 	  	.fail((xhr, status) => {
 	  		console.log("%c" + "failed to load all games data", "color: black; font-weight:bold; background-color: Red;");

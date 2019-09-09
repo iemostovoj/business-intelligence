@@ -29,7 +29,7 @@ class SessionsAndReccurenciesTableHead extends React.Component {
         this.props.onRequestSort(event, property);
     };
 
-    rows = [
+    columns = [
         { id: 'game', numeric: false, disablePadding: false, label: 'Игра' },
         { id: 'av_ses_pl', numeric: true, disablePadding: false, label: 'Среднее кол-во сессий' },
         { id: 'av_mr_ses', numeric: true, disablePadding: false, label: 'Среднее кол-во спинов за сессию' },
@@ -39,30 +39,30 @@ class SessionsAndReccurenciesTableHead extends React.Component {
 
   render() {
     const { order, orderBy, rowCount } = this.props;
-    const rows = this.rows;
+    const columns = this.columns;
 
     return (
       <TableHead>
         <TableRow>
-          {rows.map(row => {
+          {columns.map(column => {
             return (
               <TableCell
-                key={row.id}
-                numeric={row.numeric}
-                padding={row.disablePadding ? 'none' : 'default'}
-                sortDirection={orderBy === row.id ? order : false}
+                key={column.id}
+                numeric={column.numeric}
+                padding={column.disablePadding ? 'none' : 'default'}
+                sortDirection={orderBy === column.id ? order : false}
               >
                 <Tooltip
                   title="Sort"
-                  placement={row.numeric ? 'bottom-end' : 'bottom-start'}
+                  placement={column.numeric ? 'bottom-end' : 'bottom-start'}
                   enterDelay={300}
                 >
                   <TableSortLabel
-                    active={orderBy === row.id}
+                    active={orderBy === column.id}
                     direction={order}
-                    onClick={this.createSortHandler(row.id)}
+                    onClick={this.createSortHandler(column.id)}
                   >
-                    {row.label}
+                    {column.label}
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>

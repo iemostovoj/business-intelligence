@@ -17,6 +17,8 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Checkbox from '@material-ui/core/Checkbox';
 import {bi} from './general';
+// import * as jsPDF from 'jspdf';
+import htmlToImage from 'html-to-image';
 
 const styles = {
     card: {
@@ -54,11 +56,13 @@ class RequestComposer extends React.Component {
             type: this.props.request.date ? this.props.request.date.type : "abs",
             date_unit: this.props.request.date ? this.props.request.date.date_unit :  "w",
             start: this.props.request.date ? this.props.request.date.start :  "2018-05-24",
-            end: this.props.request.date ? this.props.request.date.end :  "2019-01-25",
+            end: this.props.request.date ? this.props.request.date.end :  "2019-06-21",
         },
         desk_mob: "desk+mob",
         dp: "dp+nodp",
     };
+
+    // doc = new jsPDF();
 
     handleChange = event => {
         let propName = event.target.name,
@@ -93,10 +97,28 @@ class RequestComposer extends React.Component {
         this.props.loadBtnCallback();
     }
 
-    checkUser = (event) => {
+    printBtnClickHandler = (event) => {
         event.preventDefault();
+        let btn = event.currentTarget;
         
-        alert(`Bingo!`);
+        $(btn).prop("locked", true);
+        this.forceUpdate();
+        setTimeout(() => {
+            $(btn).prop("locked", false);
+            this.forceUpdate();
+        }, 3300);
+        
+        /*this.doc.fromHTML($('#app').html(), 15, 15, {'width': 800});
+        this.doc.save('sample-file.pdf');*/
+
+        let date = new Date;
+        htmlToImage.toPng(document.getElementById('app'))
+          .then(function (dataUrl) {
+            var link = document.createElement('a');
+            link.download = `data-charts_${date.getDate()}_${date.getMonth()}_${date.getFullYear()}`;
+            link.href = dataUrl;
+            link.click();
+          });
     }
 
     componentDidMount = () => {
@@ -229,15 +251,19 @@ class RequestComposer extends React.Component {
                                 <Button 
                                     variant="contained" 
                                     color="primary" 
-                                    onClick={this.loadBtnClickHandler}>
+                                    onClick={this.loadBtnClickHandler}
+                                >
                                         Load
                                 </Button>
                                 <Button 
-                                    style={{marginLeft: 15}}
+                                    id="save-png"
                                     variant="contained" 
-                                    color="secondary" 
-                                    onClick={this.checkUser}>
-                                        Check
+                                    color="primary"
+                                    style={{marginLeft: 20}}
+                                    onClick={this.printBtnClickHandler}
+                                    disabled={ !!$("#save-png").prop("locked") }
+                                >
+                                        Save as png
                                 </Button>
                             </Grid>
                         </Grid>

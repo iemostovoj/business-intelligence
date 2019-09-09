@@ -6,11 +6,22 @@ class MacroroundsChart extends React.Component {
 	displayName = 'MacroroundsChart';
 
     getXLabels = (data) => {
+        const dateType = this.props.dateInfo.date.type;
+        let arr;
+
         // находим макс. кол-во месяцев для графика
         let max = data.map(item => item.count).sort((a, b) => b - a)[0];
-        // генерируем массив [1,.. max]
-        let arr = Array.from(Array(max + 1).keys());
-        arr.shift();
+        if (dateType === "rel") {
+            // генерируем массив [1,.. max]
+            arr = Array.from(Array(max + 1).keys());
+            arr.shift();
+        } else {
+            arr = [];
+            for (var i = 1; i <= max; i++) {
+                arr.push(this.props.dateInfo["1"].int[`${i}`].start);
+            }
+        }
+        
         return arr;
     };
 

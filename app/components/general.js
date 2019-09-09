@@ -1,5 +1,5 @@
 const bi = {
-	postURL: 'http://nda-nda.com:8080',
+	postURL: 'http://bi-dzento-int-lxc.dzento.com:8080',
 	func: {
 		desc: (a, b, orderBy) => {
 			if (b[orderBy] < a[orderBy]) {

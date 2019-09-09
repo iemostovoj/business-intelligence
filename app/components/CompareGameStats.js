@@ -24,6 +24,7 @@ import AvSessionsPerPlayerChart from './compare_games/AvSessionsPerPlayerChart';
 import AvSpinsPerSessionChart from './compare_games/AvSpinsPerSessionChart';
 import RecurrenceNewPlayersChart from './compare_games/RecurrenceNewPlayersChart';
 import RecurrenceExistingPlayersChart from './compare_games/RecurrenceExistingPlayersChart';
+import CommonTable from './compare_games/CommonTable';
 
 const styles = {
   logo: {
@@ -56,6 +57,7 @@ class CompareGameStats extends React.Component {
 			"mode":1,
 		},
 		tabValue: 0,
+		dateEdited: false,
 	}
 
 	getMroundsAndPlayers = (data, field, isChart) => {
@@ -65,18 +67,21 @@ class CompareGameStats extends React.Component {
 				let interval = data[key].int,
 					started = false,
 					num = 0,
+					rowArr = [],
 					row = {};
 				for (let prop in interval) {
-					started = started || interval[prop].mrounds > 0;
+					started = started || interval[prop].mrounds > 0 || data.date.type === "abs";
 					if (started) {
 						row[`date_${++num}`] = field === "mrounds/uniq_players" 
 							? Math.floor(interval[prop].mrounds / interval[prop].uniq_players) 
 							: interval[prop][field];
+						rowArr.push(row[`date_${num}`]);
 					}
 				}
 				row.count = num;
 				row.game = data[key].total_data.game;
-				row.normValue = row.date_1;
+				// row.normValue = row.date_1;
+				row.normValue = rowArr.filter(int => int > 0)[0];
 				fields.push(row);
 			}
 		}
@@ -90,9 +95,13 @@ class CompareGameStats extends React.Component {
 			"m": "Месяц #",
 		};
 		let converted = [];
+		// debugger;
 		for (let i = 0; i < total; i++) {
 			let newRow = {};
-			newRow.date = dateType[data.date.date_unit] + (i+1);
+			// newRow.date = dateType[data.date.date_unit] + (i+1);
+			newRow.date = data.date.type === "rel"
+				? dateType[data.date.date_unit] + (i+1)
+				: data["1"].int[`${i + 1}`].start;
 			for (let d = 0; d < fields.length; d++) {
 				newRow[`result_${d+1}`] = fields[d][`date_${i+1}`] || '';
 			}
@@ -100,7 +109,7 @@ class CompareGameStats extends React.Component {
 			converted.push(newRow);
 		}
 		converted.games = fields.map(obj => obj.game);
-		converted.normValues = fields.map(obj => obj.date_1);
+		converted.normValues = fields.map(obj => obj.normValue);
 		return converted;
 	}
 
@@ -193,7 +202,8 @@ class CompareGameStats extends React.Component {
 		        date: data.date,
 		        desk_mob: data.desk_mob,
 		        dp: data.dp
-		    }
+		    },
+		    dateEdited: true
 		}));
 	}
 
@@ -211,8 +221,8 @@ class CompareGameStats extends React.Component {
 			"w": "в неделю",
 			"m": "в месяц",
 		};
-		// debugger;
-		const word = this.state.commonData
+		
+		const interval = this.state.commonData
 			? dateType[this.state.data.date.date_unit]
 			: '';
 		const { tabValue } = this.state;
@@ -226,11 +236,17 @@ class CompareGameStats extends React.Component {
 							<div className="container text-center" style={{ paddingTop: 25, marginBottom: 25 }}>
 								<RequestComposer 
 									setRequestData={this.setRequestData} 
-									request={this.props.request} 
+									request={this.state.dateEdited ? this.state.request : this.props.request} 
 									loadBtnCallback={this.pressLoad}
 								/>
 							</div>
-							<h5>Количество макрораундов {word}</h5>
+
+							<h5>Общие данные</h5>
+							<div style={{display: 'flex'}}>
+								<CommonTable data={this.state.commonData}  />
+							</div>
+
+							<h5 style={{ paddingTop: 25 }}>Количество макрораундов {interval}</h5>
 							<FormControlLabel
 								control={
 									<Switch name="mr" checked={this.state.mrNormalized} onChange={this.handleNormalizeSwitch} aria-label="LoginSwitch" />
@@ -238,9 +254,13 @@ class CompareGameStats extends React.Component {
 								label={this.state.mrNormalized ? "Нормализация данных включена" : "Нормализация данных выключена"}
 							/>
 							<MacroroundsTable data={this.state.macrorounds} normalized={this.state.mrNormalized} />
-							<MacroroundsChart data={this.state.macroroundsChart} normalized={this.state.mrNormalized}/>
+							<MacroroundsChart 
+								data={this.state.macroroundsChart} 
+								normalized={this.state.mrNormalized}
+								dateInfo={this.state.commonData}
+							/>
 
-							<h5 style={{ paddingTop: 25 }}>Количество игроков {word}</h5>
+							<h5 style={{ paddingTop: 25 }}>Количество игроков {interval}</h5>
 							<FormControlLabel
 								control={
 									<Switch name="pl" checked={this.state.plNormalized} onChange={this.handleNormalizeSwitch} aria-label="LoginSwitch" />
@@ -248,9 +268,13 @@ class CompareGameStats extends React.Component {
 								label={this.state.plNormalized ? "Нормализация данных включена" : "Нормализация данных выключена"}
 							/>
 							<PlayersTable data={this.state.players} normalized={this.state.plNormalized} />
-							<PlayersChart data={this.state.playersChart} normalized={this.state.plNormalized} />
+							<PlayersChart 
+								data={this.state.playersChart} 
+								normalized={this.state.plNormalized} 
+								dateInfo={this.state.commonData}
+							/>
 
-							<h5 style={{ paddingTop: 25 }}>Среднее количество спинов на 1 игрока {word}</h5>
+							<h5 style={{ paddingTop: 25 }}>Среднее количество спинов на 1 игрока {interval}</h5>
 							<FormControlLabel
 								control={
 									<Switch name="spp" checked={this.state.sppNormalized} onChange={this.handleNormalizeSwitch} aria-label="LoginSwitch" />
@@ -258,7 +282,11 @@ class CompareGameStats extends React.Component {
 								label={this.state.sppNormalized ? "Нормализация данных включена" : "Нормализация данных выключена"}
 							/>
 							<SpinsPerPlayerTable data={this.state.spinsPerPlayer} normalized={this.state.sppNormalized} />
-							<SpinsPerPlayerChart data={this.state.spinsPerPlayerChart} normalized={this.state.sppNormalized} />
+							<SpinsPerPlayerChart 
+								data={this.state.spinsPerPlayerChart} 
+								normalized={this.state.sppNormalized} 
+								dateInfo={this.state.commonData}
+							/>
 
 							<h5 style={{ paddingTop: 25 }}>Средние показатели на 1 игрока</h5>
 							<SessionsAndReccurenciesTable data={this.state.sessAndRecc}/>

@@ -59,6 +59,7 @@ class OneGameStats extends React.Component {
 			"user_name":"e.mostovoy",
 			"mode":1,
 		},
+		dateEdited: false
 	}
 
 	getPlayersSpinsData = (data) => {
@@ -95,7 +96,6 @@ class OneGameStats extends React.Component {
 			}
 			fields.push(obj);
 		}
-		console.log(fields);
 		return fields;
 	}
 
@@ -205,7 +205,8 @@ class OneGameStats extends React.Component {
 		        date: data.date,
 		        desk_mob: data.desk_mob,
 		        dp: data.dp
-		    }
+		    },
+		    dateEdited: true
 		}));
 	}
 
@@ -224,16 +225,13 @@ class OneGameStats extends React.Component {
 							<div className="container text-center" style={{ paddingTop: 25, marginBottom: 25 }}>
 								<RequestComposer 
 									setRequestData={this.setRequestData} 
-									request={this.props.request} 
+									request={this.state.dateEdited ? this.state.request : this.props.request} 
 									loadBtnCallback={this.pressLoad}
 								/>
 							</div>
 							<h5>Общие данные</h5>
 							<div style={{display: 'flex'}}>
 								<CommonTable data={this.state.commonData}  />
-								<div style={styles.logo}>
-									<LogoCard game={this.props.game}/>
-								</div>
 							</div>
 
 							<h5 style={{ paddingTop: 25 }}>Анализ количества спинов по игрокам</h5>
